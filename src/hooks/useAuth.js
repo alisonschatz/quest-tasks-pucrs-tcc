@@ -1,4 +1,7 @@
 // src/hooks/useAuth.js
+import AuthWrapper from './components/AuthWrapper';
+import { useAuth } from './hooks/useAuth';
+import { useFirebaseQuests } from './hooks/useFirebaseQuests';
 import { useState, useEffect } from 'react';
 import { 
   signInWithPopup,
