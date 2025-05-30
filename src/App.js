@@ -1,300 +1,336 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Check, Trash2, Star, Trophy, Zap, Target, Award } from 'lucide-react';
+// src/App.js
+import React from 'react';
+import AuthWrapper from './components/AuthWrapper';
+import { useAuth } from './hooks/useAuth';
+import { useFirebaseQuests } from './hooks/useFirebaseQuests';
 
-const GamifiedTodoApp = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
-  const [userStats, setUserStats] = useState({
-    level: 1,
-    xp: 0,
-    totalCompleted: 0,
-    streak: 0,
-    lastCompletedDate: null
-  });
+// Componente principal da aplicação
+function MainApp() {
+  const { user, logout } = useAuth();
+  const { 
+    tasks, 
+    playerData, 
+    loading, 
+    error, 
+    addTask, 
+    completeTask, 
+    deleteTask 
+  } = useFirebaseQuests(user?.uid);
 
-  // Sistema de níveis baseado em XP
-  const getXpForLevel = (level) => level * 100;
-  const getCurrentLevelProgress = () => {
-    const currentLevelXp = getXpForLevel(userStats.level);
-    const nextLevelXp = getXpForLevel(userStats.level + 1);
-    const progress = ((userStats.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
-    return Math.max(0, Math.min(100, progress));
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando suas quests...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Conquistas disponíveis
-  const achievements = [
-    { id: 'first_task', name: 'Primeira Tarefa', description: 'Complete sua primeira tarefa', icon: Star, unlocked: userStats.totalCompleted >= 1 },
-    { id: 'task_master', name: 'Mestre das Tarefas', description: 'Complete 10 tarefas', icon: Trophy, unlocked: userStats.totalCompleted >= 10 },
-    { id: 'streak_3', name: 'Consistência', description: 'Mantenha uma sequência de 3 dias', icon: Zap, unlocked: userStats.streak >= 3 },
-    { id: 'level_5', name: 'Veterano', description: 'Alcance o nível 5', icon: Target, unlocked: userStats.level >= 5 }
-  ];
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50">
+        <div className="text-center p-6 bg-white rounded-lg shadow-lg max-w-md">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-red-600 mb-2">Erro de Conexão</h2>
+          <p className="text-gray-600 mb-4">Não foi possível conectar ao Firebase</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Tentar Novamente
+          </button>
+        </div>
+      </div>
+    );
+  }
 
-  // Adicionar nova tarefa
-  const addTask = () => {
-    if (newTask.trim()) {
-      const task = {
-        id: Date.now(),
-        text: newTask.trim(),
-        completed: false,
-        priority: 'medium',
-        createdAt: new Date().toISOString(),
-        xpReward: Math.floor(Math.random() * 30) + 20 // 20-50 XP
-      };
-      setTasks([...tasks, task]);
-      setNewTask('');
-    }
-  };
-
-  // Completar tarefa
-  const completeTask = (taskId) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task || task.completed) return;
-
-    setTasks(tasks.map(t => 
-      t.id === taskId ? { ...t, completed: true, completedAt: new Date().toISOString() } : t
-    ));
-
-    // Atualizar estatísticas do usuário
-    const newXp = userStats.xp + task.xpReward;
-    const newLevel = Math.floor(newXp / 100) + 1;
-    const today = new Date().toDateString();
-    const lastCompleted = userStats.lastCompletedDate;
-    
-    let newStreak = userStats.streak;
-    if (lastCompleted) {
-      const lastDate = new Date(lastCompleted).toDateString();
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      
-      if (lastDate === today) {
-        // Já completou hoje, mantém streak
-      } else if (lastDate === yesterday.toDateString()) {
-        newStreak += 1;
-      } else {
-        newStreak = 1;
-      }
-    } else {
-      newStreak = 1;
-    }
-
-    setUserStats({
-      level: newLevel,
-      xp: newXp,
-      totalCompleted: userStats.totalCompleted + 1,
-      streak: newStreak,
-      lastCompletedDate: today
+  // Função para adicionar tarefa (exemplo)
+  const handleAddTask = (taskData) => {
+    addTask({
+      title: taskData.title,
+      description: taskData.description,
+      priority: taskData.priority || 'media',
+      category: taskData.category || 'geral'
     });
   };
 
-  // Remover tarefa
-  const removeTask = (taskId) => {
-    setTasks(tasks.filter(t => t.id !== taskId));
-  };
-
-  // Alterar prioridade da tarefa
-  const changePriority = (taskId, priority) => {
-    setTasks(tasks.map(t => 
-      t.id === taskId ? { ...t, priority } : t
-    ));
-  };
-
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'high': return 'border-red-400 bg-red-50';
-      case 'medium': return 'border-yellow-400 bg-yellow-50';
-      case 'low': return 'border-green-400 bg-green-50';
-      default: return 'border-gray-400 bg-gray-50';
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 p-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header com estatísticas do jogador */}
-        <div className="card mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Trophy className="text-yellow-400" />
-              Quest Tasks
-            </h1>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-white">Nível {userStats.level}</div>
-              <div className="text-sm text-gray-300">{userStats.xp} XP</div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <span className="text-2xl">🎮</span>
+              <h1 className="text-2xl font-bold text-gray-900">Quest Tasks</h1>
             </div>
-          </div>
-          
-          {/* Barra de progresso de nível */}
-          <div className="mb-4">
-            <div className="flex justify-between text-sm text-gray-300 mb-1">
-              <span>Progresso do Nível</span>
-              <span>{Math.round(getCurrentLevelProgress())}%</span>
-            </div>
-            <div className="w-full bg-gray-700 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${getCurrentLevelProgress()}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Estatísticas */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div className="bg-white/10 rounded-lg p-3">
-              <div className="text-2xl font-bold text-white">{userStats.totalCompleted}</div>
-              <div className="text-sm text-gray-300">Concluídas</div>
-            </div>
-            <div className="bg-white/10 rounded-lg p-3">
-              <div className="text-2xl font-bold text-orange-400">{userStats.streak}</div>
-              <div className="text-sm text-gray-300">Sequência</div>
-            </div>
-            <div className="bg-white/10 rounded-lg p-3">
-              <div className="text-2xl font-bold text-green-400">{tasks.filter(t => !t.completed).length}</div>
-              <div className="text-sm text-gray-300">Pendentes</div>
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-500">
+                ID: {user?.uid?.slice(0, 8)}...
+              </div>
+              <button
+                onClick={logout}
+                className="text-gray-500 hover:text-gray-700 text-sm bg-gray-100 px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Sair
+              </button>
             </div>
           </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Seção principal de tarefas */}
-          <div className="lg:col-span-2">
-            {/* Adicionar nova tarefa */}
-            <div className="card mb-6">
-              <h2 className="text-xl font-bold text-white mb-4">Nova Quest</h2>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newTask}
-                  onChange={(e) => setNewTask(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && addTask()}
-                  placeholder="Digite sua nova tarefa..."
-                  className="flex-1 px-4 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <button
-                  onClick={addTask}
-                  className="btn-primary flex items-center gap-2"
-                >
-                  <Plus size={18} />
-                  Adicionar
-                </button>
+      {/* Conteúdo Principal */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          
+          {/* Stats do Jogador */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-lg font-bold text-gray-800 mb-4">⚡ Seu Progresso</h2>
+              
+              {/* Nível */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-600">Nível</span>
+                  <span className="text-2xl font-bold text-purple-600">{playerData.level}</span>
+                </div>
+                
+                {/* Barra de XP */}
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-3 rounded-full transition-all duration-500"
+                    style={{ width: `${playerData.xp}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">{playerData.xp}/100 XP</p>
               </div>
-            </div>
 
-            {/* Lista de tarefas */}
-            <div className="card">
-              <h2 className="text-xl font-bold text-white mb-4">Suas Quests</h2>
+              {/* Estatísticas */}
               <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">🔥 Sequência</span>
+                  <span className="font-semibold">{playerData.streak} dias</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">✅ Concluídas</span>
+                  <span className="font-semibold">{playerData.tasksCompleted}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-gray-600">🏆 Conquistas</span>
+                  <span className="font-semibold">{playerData.achievements?.length || 0}</span>
+                </div>
+              </div>
+
+              {/* Conquistas */}
+              {playerData.achievements?.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">🏅 Conquistas</h3>
+                  <div className="flex flex-wrap gap-1">
+                    {playerData.achievements.map(achievement => (
+                      <span 
+                        key={achievement}
+                        className="inline-block bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full"
+                      >
+                        {getAchievementEmoji(achievement)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Lista de Tarefas */}
+          <div className="lg:col-span-3">
+            <div className="space-y-6">
+              
+              {/* Formulário para Adicionar Tarefa */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">➕ Nova Quest</h2>
+                <TaskForm onSubmit={handleAddTask} />
+              </div>
+
+              {/* Lista de Tarefas */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Suas Quests</h2>
+                
                 {tasks.length === 0 ? (
-                  <div className="text-center py-8 text-gray-300">
-                    <Target size={48} className="mx-auto mb-4 opacity-50" />
-                    <p>Nenhuma quest ainda. Adicione sua primeira tarefa!</p>
+                  <div className="text-center py-8 text-gray-500">
+                    <div className="text-4xl mb-2">🎯</div>
+                    <p>Nenhuma quest ainda. Que tal criar sua primeira?</p>
                   </div>
                 ) : (
-                  tasks.map(task => (
-                    <div
-                      key={task.id}
-                      className={`flex items-center gap-3 p-4 rounded-lg border-2 transition-all duration-200 ${
-                        task.completed 
-                          ? 'bg-green-500/20 border-green-500/50' 
-                          : `${getPriorityColor(task.priority)} border-opacity-50`
-                      }`}
-                    >
-                      <button
-                        onClick={() => completeTask(task.id)}
-                        disabled={task.completed}
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                          task.completed
-                            ? 'bg-green-500 border-green-500 text-white'
-                            : 'border-gray-400 hover:border-purple-500 hover:bg-purple-500/20'
-                        }`}
-                      >
-                        {task.completed && <Check size={14} />}
-                      </button>
-                      
-                      <div className="flex-1">
-                        <div className={`${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                          {task.text}
-                        </div>
-                        <div className="flex items-center gap-4 mt-1">
-                          <select
-                            value={task.priority}
-                            onChange={(e) => changePriority(task.id, e.target.value)}
-                            disabled={task.completed}
-                            className="text-xs px-2 py-1 rounded bg-white/50 border border-gray-300"
-                          >
-                            <option value="low">Baixa</option>
-                            <option value="medium">Média</option>
-                            <option value="high">Alta</option>
-                          </select>
-                          <span className="text-xs text-gray-600">
-                            +{task.xpReward} XP
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <button
-                        onClick={() => removeTask(task.id)}
-                        className="flex-shrink-0 p-2 text-red-500 hover:bg-red-500/20 rounded-lg transition-colors duration-200"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  ))
+                  <div className="space-y-3">
+                    {tasks.map(task => (
+                      <TaskItem
+                        key={task.id}
+                        task={task}
+                        onComplete={completeTask}
+                        onDelete={deleteTask}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
           </div>
+        </div>
+      </main>
+    </div>
+  );
+}
 
-          {/* Sidebar com conquistas */}
-          <div className="card">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Award className="text-yellow-400" />
-              Conquistas
-            </h2>
-            <div className="space-y-3">
-              {achievements.map(achievement => {
-                const IconComponent = achievement.icon;
-                return (
-                  <div
-                    key={achievement.id}
-                    className={`p-3 rounded-lg border transition-all duration-200 ${
-                      achievement.unlocked
-                        ? 'bg-yellow-500/20 border-yellow-500/50'
-                        : 'bg-gray-500/20 border-gray-500/30'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <IconComponent 
-                        size={24} 
-                        className={achievement.unlocked ? 'text-yellow-400' : 'text-gray-500'} 
-                      />
-                      <div>
-                        <div className={`font-semibold ${
-                          achievement.unlocked ? 'text-white' : 'text-gray-400'
-                        }`}>
-                          {achievement.name}
-                        </div>
-                        <div className="text-xs text-gray-300">
-                          {achievement.description}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+// Componente para formulário de tarefa
+function TaskForm({ onSubmit }) {
+  const [title, setTitle] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [priority, setPriority] = React.useState('media');
 
-            {/* Dicas motivacionais */}
-            <div className="mt-6 p-4 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-              <h3 className="font-semibold text-white mb-2">💡 Dica</h3>
-              <p className="text-sm text-gray-300">
-                Complete tarefas consecutivamente para manter sua sequência e ganhar mais XP!
-              </p>
-            </div>
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+
+    onSubmit({
+      title: title.trim(),
+      description: description.trim(),
+      priority
+    });
+
+    setTitle('');
+    setDescription('');
+    setPriority('media');
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <input
+          type="text"
+          placeholder="Título da quest..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+          required
+        />
+      </div>
+      
+      <div className="flex gap-4">
+        <select
+          value={priority}
+          onChange={(e) => setPriority(e.target.value)}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+        >
+          <option value="baixa">🟢 Baixa (+10 XP)</option>
+          <option value="media">🟡 Média (+25 XP)</option>
+          <option value="alta">🔴 Alta (+50 XP)</option>
+        </select>
+        
+        <button
+          type="submit"
+          className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium"
+        >
+          Criar Quest
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Componente para item de tarefa
+function TaskItem({ task, onComplete, onDelete }) {
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'alta': return 'border-l-red-500 bg-red-50';
+      case 'media': return 'border-l-yellow-500 bg-yellow-50';
+      case 'baixa': return 'border-l-green-500 bg-green-50';
+      default: return 'border-l-gray-500 bg-gray-50';
+    }
+  };
+
+  const getPriorityEmoji = (priority) => {
+    switch (priority) {
+      case 'alta': return '🔴';
+      case 'media': return '🟡';
+      case 'baixa': return '🟢';
+      default: return '⚪';
+    }
+  };
+
+  return (
+    <div className={`border-l-4 p-4 rounded-lg ${getPriorityColor(task.priority)} ${task.completed ? 'opacity-60' : ''}`}>
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <span>{getPriorityEmoji(task.priority)}</span>
+            <h3 className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+              {task.title}
+            </h3>
+            {task.completed && <span className="text-green-600">✅</span>}
           </div>
+          
+          {task.description && (
+            <p className="text-sm text-gray-600 ml-6">{task.description}</p>
+          )}
+          
+          <div className="flex items-center gap-4 mt-2 ml-6 text-xs text-gray-500">
+            <span>+{getXpForPriority(task.priority)} XP</span>
+            <span>{task.createdAt?.toLocaleDateString?.()}</span>
+          </div>
+        </div>
+        
+        <div className="flex gap-2 ml-4">
+          {!task.completed && (
+            <button
+              onClick={() => onComplete(task.id)}
+              className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Concluir
+            </button>
+          )}
+          
+          <button
+            onClick={() => onDelete(task.id)}
+            className="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Excluir
+          </button>
         </div>
       </div>
     </div>
   );
-};
+}
 
-export default GamifiedTodoApp;
+// Funções auxiliares
+function getXpForPriority(priority) {
+  const xpMap = {
+    'baixa': 10,
+    'media': 25,
+    'alta': 50
+  };
+  return xpMap[priority] || 25;
+}
+
+function getAchievementEmoji(achievement) {
+  const emojiMap = {
+    'first-quest': '⭐',
+    'task-master': '🏆',
+    'consistency': '🔥',
+    'veteran': '👑'
+  };
+  return emojiMap[achievement] || '🏅';
+}
+
+// Componente principal do App
+function App() {
+  return (
+    <AuthWrapper>
+      <MainApp />
+    </AuthWrapper>
+  );
+}
+
+export default App;
