@@ -1,7 +1,4 @@
 // src/hooks/useAuth.js
-import AuthWrapper from './components/AuthWrapper';
-import { useAuth } from './hooks/useAuth';
-import { useFirebaseQuests } from './hooks/useFirebaseQuests';
 import { useState, useEffect } from 'react';
 import { 
   signInWithPopup,
@@ -46,7 +43,6 @@ export function useAuth() {
       provider.addScope('email');
       provider.addScope('profile');
       
-      // Configurar para sempre mostrar a tela de seleção de conta
       provider.setCustomParameters({
         prompt: 'select_account'
       });
