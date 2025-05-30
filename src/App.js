@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useFirebaseQuests } from '../hooks/useFirebaseQuests';
+import AuthWrapper from './components/AuthWrapper';
+import { useAuth } from './hooks/useAuth';
 
 function MainApp() {
   const { user, logout } = useAuth();
