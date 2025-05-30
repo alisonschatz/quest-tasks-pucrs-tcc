@@ -1,7 +1,7 @@
 {
   "name": "quest-tasks-pucrs-tcc",
   "version": "1.0.0",
-  "homepage": "https://alisonschatz.github.io/quest-tasks-pucrs-tcc",
+  "homepage": "https://quest-tasks-pucrs-tcc.vercel.app/",
   "description": "Lista de Tarefas Gamificada - TCC PUCRS Pós-Graduação Full Stack",
   "private": true,
   "dependencies": {
