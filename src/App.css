@@ -1,0 +1,240 @@
+/* Estilos específicos para o componente App */
+.App {
+  text-align: center;
+}
+
+/* Animações personalizadas para o Quest Tasks */
+@keyframes levelUpPulse {
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+  }
+  50% { 
+    transform: scale(1.05); 
+    box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+  }
+}
+
+@keyframes taskComplete {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes achievementUnlock {
+  0% { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.8); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: translateY(-5px) scale(1.05); 
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+@keyframes xpGain {
+  0% { 
+    opacity: 0; 
+    transform: translateY(0) scale(0.8); 
+  }
+  50% { 
+    opacity: 1; 
+    transform: translateY(-10px) scale(1.2); 
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.8); 
+  }
+}
+
+/* Classes utilitárias para animações */
+.level-up-pulse {
+  animation: levelUpPulse 1s ease-in-out;
+}
+
+.task-complete-animation {
+  animation: taskComplete 0.5s ease-in-out;
+}
+
+.achievement-unlock {
+  animation: achievementUnlock 0.8s ease-out;
+}
+
+.xp-gain-animation {
+  animation: xpGain 1.5s ease-out;
+}
+
+/* Efeitos de hover personalizados */
+.quest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.achievement-card:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* Gradientes personalizados */
+.bg-quest-gradient {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-achievement-gradient {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.bg-level-gradient {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+/* Efeitos de texto */
+.text-glow {
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+}
+
+.text-gold {
+  background: linear-gradient(45deg, #ffd700, #ffed4e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Loading states */
+.loading-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsividade adicional */
+@media (max-width: 768px) {
+  .quest-stats-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .achievement-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Efeitos especiais para celebração */
+.celebration-confetti {
+  position: relative;
+  overflow: hidden;
+}
+
+.celebration-confetti::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, #ffd700 0%, transparent 50%),
+    radial-gradient(circle at 40% 50%, #ff6b6b 0%, transparent 50%),
+    radial-gradient(circle at 60% 50%, #4ecdc4 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, #45b7d1 0%, transparent 50%);
+  opacity: 0;
+  animation: confetti 3s ease-in-out;
+}
+
+@keyframes confetti {
+  0% { opacity: 0; transform: translateY(100%) rotate(0deg); }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-100%) rotate(360deg); }
+}
+
+/* Tema escuro (para futuras implementações) */
+@media (prefers-color-scheme: dark) {
+  .App {
+    background-color: #0f0f23;
+    color: #ffffff;
+  }
+}
+
+/* Animações de entrada suaves */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Efeitos para progresso de XP */
+.xp-bar-fill {
+  transition: width 1s ease-out;
+  background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Estados de interação aprimorados */
+.interactive-element {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interactive-element:hover {
+  transform: translateY(-1px);
+}
+
+.interactive-element:active {
+  transform: translateY(0);
+}
+
+/* Indicadores de status */
+.status-indicator {
+  position: relative;
+}
+
+.status-indicator::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.inactive::after {
+  background: #6b7280;
+}
