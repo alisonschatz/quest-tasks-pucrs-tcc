@@ -1,4 +1,5 @@
 // src/utils/themes.js
+import React, { createContext, useContext, useState, useEffect } from 'react';
 export const THEMES = {
   default: {
     id: 'default',
@@ -278,7 +279,6 @@ export const useThemes = (playerData) => {
 };
 
 // Context para tema atual
-import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
