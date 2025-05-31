@@ -1,4 +1,4 @@
-// src/hooks/useFirebaseQuests.js
+// src/hooks/useFirebaseQuests.js - Versão atualizada com conquistas expandidas
 import { useState, useEffect } from 'react';
 import { 
   collection, 
@@ -8,13 +8,13 @@ import {
   doc, 
   onSnapshot, 
   query, 
-  where, 
-  orderBy,
+  where,
   serverTimestamp,
   setDoc,
   getDoc
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
+import { useAchievements } from '../utils/achievements';
 
 export function useFirebaseQuests(userId) {
   const [tasks, setTasks] = useState([]);
@@ -30,6 +30,9 @@ export function useFirebaseQuests(userId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Hook para verificar conquistas
+  const { checkAchievements } = useAchievements(playerData, tasks);
+
   // Escutar mudanças das tarefas em tempo real
   useEffect(() => {
     if (!userId) {
@@ -37,23 +40,31 @@ export function useFirebaseQuests(userId) {
       return;
     }
 
+    console.log('useFirebaseQuests: Iniciando para userId:', userId);
+
     const tasksQuery = query(
       collection(db, 'tasks'),
-      where('userId', '==', userId),
-      orderBy('createdAt', 'desc')
+      where('userId', '==', userId)
     );
 
     const unsubscribeTasks = onSnapshot(
       tasksQuery, 
       (snapshot) => {
+        console.log('Snapshot recebido:', snapshot.size, 'documentos');
+        
         const tasksData = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate?.() || new Date(),
           completedAt: doc.data().completedAt?.toDate?.() || null
         }));
+        
+        tasksData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        
+        console.log('Tasks processadas:', tasksData);
         setTasks(tasksData);
         setLoading(false);
+        setError(null);
       },
       (error) => {
         console.error('Erro ao buscar tarefas:', error);
@@ -69,19 +80,26 @@ export function useFirebaseQuests(userId) {
   useEffect(() => {
     if (!userId) return;
 
+    console.log('useFirebaseQuests: Configurando player data para:', userId);
+
     const playerDocRef = doc(db, 'players', userId);
     
     const unsubscribePlayer = onSnapshot(
       playerDocRef,
-      async (doc) => {
-        if (doc.exists()) {
-          const data = doc.data();
+      async (docSnapshot) => {
+        console.log('Player doc exists:', docSnapshot.exists());
+        
+        if (docSnapshot.exists()) {
+          const data = docSnapshot.data();
+          console.log('Player data:', data);
+          
           setPlayerData({
             ...data,
             lastActiveDate: data.lastActiveDate?.toDate?.() || null
           });
         } else {
-          // Criar documento do jogador se não existir
+          console.log('Criando novo player document');
+          
           const initialPlayerData = {
             level: 1,
             xp: 0,
@@ -93,7 +111,13 @@ export function useFirebaseQuests(userId) {
             createdAt: serverTimestamp()
           };
           
-          await setDoc(playerDocRef, initialPlayerData);
+          try {
+            await setDoc(playerDocRef, initialPlayerData);
+            console.log('Player document criado');
+          } catch (error) {
+            console.error('Erro ao criar player document:', error);
+            setError(error);
+          }
         }
       },
       (error) => {
@@ -105,27 +129,46 @@ export function useFirebaseQuests(userId) {
     return () => unsubscribePlayer();
   }, [userId]);
 
-  // Adicionar nova tarefa
+  // Verificar conquistas quando dados mudarem
+  useEffect(() => {
+    if (!userId || tasks.length === 0) return;
+    
+    const newAchievements = checkAchievements();
+    
+    if (newAchievements.length > 0) {
+      console.log('🏆 Novas conquistas desbloqueadas:', newAchievements);
+      updatePlayerAchievements(newAchievements);
+    }
+  }, [playerData.tasksCompleted, playerData.streak, playerData.level, tasks.length]);
+
   const addTask = async (taskData) => {
-    if (!userId) return;
+    if (!userId) {
+      console.error('Sem userId para adicionar tarefa');
+      return;
+    }
+
+    console.log('Adicionando tarefa:', taskData);
 
     try {
-      await addDoc(collection(db, 'tasks'), {
+      const docRef = await addDoc(collection(db, 'tasks'), {
         ...taskData,
         userId,
         completed: false,
         createdAt: serverTimestamp(),
         completedAt: null
       });
+      
+      console.log('Tarefa adicionada com ID:', docRef.id);
     } catch (error) {
       console.error('Erro ao adicionar tarefa:', error);
       setError(error);
     }
   };
 
-  // Completar tarefa
   const completeTask = async (taskId) => {
     if (!userId) return;
+
+    console.log('Completando tarefa:', taskId);
 
     try {
       // Atualizar tarefa
@@ -138,6 +181,8 @@ export function useFirebaseQuests(userId) {
       const task = tasks.find(t => t.id === taskId);
       const xpGain = getXpForPriority(task?.priority || 'media');
       
+      console.log('XP ganho:', xpGain, 'para prioridade:', task?.priority);
+      
       // Atualizar dados do jogador
       await updatePlayerStats(xpGain);
 
@@ -147,7 +192,6 @@ export function useFirebaseQuests(userId) {
     }
   };
 
-  // Atualizar estatísticas do jogador
   const updatePlayerStats = async (xpGain) => {
     if (!userId) return;
 
@@ -174,13 +218,13 @@ export function useFirebaseQuests(userId) {
           newStreak = wasYesterday ? newStreak + 1 : 1;
         }
 
-        // Verificar novas conquistas
-        const newAchievements = checkNewAchievements(
-          currentData.achievements || [],
-          newTasksCompleted,
-          newStreak,
-          newLevel
-        );
+        console.log('Atualizando stats:', {
+          xp: newXp,
+          totalXp: newTotalXp,
+          level: newLevel,
+          streak: newStreak,
+          tasksCompleted: newTasksCompleted
+        });
 
         await updateDoc(playerRef, {
           xp: newXp,
@@ -188,7 +232,6 @@ export function useFirebaseQuests(userId) {
           level: newLevel,
           streak: newStreak,
           tasksCompleted: newTasksCompleted,
-          achievements: newAchievements,
           lastActiveDate: serverTimestamp()
         });
       }
@@ -198,12 +241,58 @@ export function useFirebaseQuests(userId) {
     }
   };
 
-  // Deletar tarefa
+  const updatePlayerAchievements = async (newAchievements) => {
+    if (!userId || newAchievements.length === 0) return;
+
+    try {
+      const playerRef = doc(db, 'players', userId);
+      const playerDoc = await getDoc(playerRef);
+      
+      if (playerDoc.exists()) {
+        const currentData = playerDoc.data();
+        const updatedAchievements = [
+          ...(currentData.achievements || []),
+          ...newAchievements
+        ];
+
+        // Calcular XP bônus das conquistas
+        const { ACHIEVEMENTS } = await import('../utils/achievements');
+        const bonusXP = newAchievements.reduce((total, achievementId) => {
+          return total + (ACHIEVEMENTS[achievementId]?.xpReward || 0);
+        }, 0);
+
+        const newTotalXp = (currentData.totalXp || 0) + bonusXP;
+        const newLevel = Math.floor(newTotalXp / 100) + 1;
+        const newXp = newTotalXp % 100;
+
+        console.log('🏆 Atualizando conquistas:', {
+          achievements: updatedAchievements,
+          bonusXP,
+          newTotalXp,
+          newLevel
+        });
+
+        await updateDoc(playerRef, {
+          achievements: updatedAchievements,
+          totalXp: newTotalXp,
+          level: newLevel,
+          xp: newXp
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar conquistas:', error);
+      setError(error);
+    }
+  };
+
   const deleteTask = async (taskId) => {
     if (!userId) return;
 
+    console.log('Deletando tarefa:', taskId);
+
     try {
       await deleteDoc(doc(db, 'tasks', taskId));
+      console.log('Tarefa deletada');
     } catch (error) {
       console.error('Erro ao deletar tarefa:', error);
       setError(error);
@@ -221,7 +310,6 @@ export function useFirebaseQuests(userId) {
   };
 }
 
-// Funções auxiliares
 function getXpForPriority(priority) {
   const xpMap = {
     'baixa': 10,
@@ -229,30 +317,4 @@ function getXpForPriority(priority) {
     'alta': 50
   };
   return xpMap[priority] || 25;
-}
-
-function checkNewAchievements(currentAchievements, tasksCompleted, streak, level) {
-  const newAchievements = [...currentAchievements];
-
-  // Primeira Quest
-  if (tasksCompleted >= 1 && !newAchievements.includes('first-quest')) {
-    newAchievements.push('first-quest');
-  }
-
-  // Mestre das Tarefas
-  if (tasksCompleted >= 10 && !newAchievements.includes('task-master')) {
-    newAchievements.push('task-master');
-  }
-
-  // Consistência
-  if (streak >= 3 && !newAchievements.includes('consistency')) {
-    newAchievements.push('consistency');
-  }
-
-  // Veterano
-  if (level >= 5 && !newAchievements.includes('veteran')) {
-    newAchievements.push('veteran');
-  }
-
-  return newAchievements;
 }
