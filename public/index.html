@@ -5,11 +5,198 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#8B5CF6" />
-    <meta name="description" content="Quest Tasks - Lista de Tarefas Gamificada. Projeto TCC PUCRS Full Stack." />
-    <title>Quest Tasks - Lista de Tarefas Gamificada</title>
+    <meta name="description" content="Quest Tasks - Transforme suas tarefas cotidianas em uma aventura épica! Sistema de gamificação completo com XP, níveis, conquistas e interface futurística." />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Meta tags para SEO -->
+    <meta name="keywords" content="task management, gamification, productivity, quest, achievements, XP system, tarefas, produtividade">
+    <meta name="author" content="Alison Schatz">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://quest-tasks-pucrs.web.app/">
+    <meta property="og:title" content="Quest Tasks - Level Up Your Life">
+    <meta property="og:description" content="Transforme suas tarefas cotidianas em uma aventura épica! Sistema de gamificação completo.">
+    <meta property="og:image" content="%PUBLIC_URL%/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://quest-tasks-pucrs.web.app/">
+    <meta property="twitter:title" content="Quest Tasks - Level Up Your Life">
+    <meta property="twitter:description" content="Transforme suas tarefas cotidianas em uma aventura épica!">
+    <meta property="twitter:image" content="%PUBLIC_URL%/og-image.png">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Quest Tasks">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <title>Quest Tasks - Level Up Your Life</title>
+    
+    <style>
+      /* Loading screen styles */
+      #initial-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loader-content {
+        text-align: center;
+        color: white;
+      }
+      
+      .loader-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        margin: 0 auto 20px;
+        animation: pulse 2s ease-in-out infinite;
+        transform: rotate(3deg);
+      }
+      
+      .loader-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        background: linear-gradient(45deg, #a855f7, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+      }
+      
+      .loader-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+        color: #d1d5db;
+        margin-bottom: 20px;
+      }
+      
+      .loader-dots {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .loader-dot {
+        width: 8px;
+        height: 8px;
+        background: #8b5cf6;
+        border-radius: 50%;
+        animation: bounce 1.4s ease-in-out infinite both;
+      }
+      
+      .loader-dot:nth-child(1) { animation-delay: -0.32s; }
+      .loader-dot:nth-child(2) { animation-delay: -0.16s; }
+      .loader-dot:nth-child(3) { animation-delay: 0s; }
+      
+      @keyframes pulse {
+        0%, 100% { transform: rotate(3deg) scale(1); }
+        50% { transform: rotate(3deg) scale(1.05); }
+      }
+      
+      @keyframes bounce {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+      }
+      
+      /* Hide loader when React app loads */
+      .loaded #initial-loader {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      /* Ensure smooth font loading */
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+        padding: 0;
+      }
+      
+      /* Prevent flash of unstyled content */
+      #root {
+        min-height: 100vh;
+      }
+    </style>
   </head>
   <body>
-    <noscript>Você precisa habilitar o JavaScript para executar esta aplicação.</noscript>
+    <noscript>
+      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #0f172a; color: white; font-family: Inter, sans-serif; text-align: center; padding: 20px;">
+        <div>
+          <div style="font-size: 60px; margin-bottom: 20px;">🎮</div>
+          <h1 style="color: #a855f7; margin-bottom: 10px;">Quest Tasks</h1>
+          <p style="color: #d1d5db; margin-bottom: 20px;">Você precisa ativar o JavaScript para usar o Quest Tasks.</p>
+          <p style="color: #9ca3af; font-size: 14px;">Por favor, ative o JavaScript no seu navegador e recarregue a página.</p>
+        </div>
+      </div>
+    </noscript>
+    
+    <!-- Initial Loading Screen -->
+    <div id="initial-loader">
+      <div class="loader-content">
+        <div class="loader-icon">🎮</div>
+        <div class="loader-text">Quest Tasks</div>
+        <div class="loader-subtitle">Carregando sua aventura épica...</div>
+        <div class="loader-dots">
+          <div class="loader-dot"></div>
+          <div class="loader-dot"></div>
+          <div class="loader-dot"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- React App Root -->
     <div id="root"></div>
+    
+    <!-- Remove loading screen when React loads -->
+    <script>
+      // Remove loading screen when React app is ready
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.body.classList.add('loaded');
+          setTimeout(function() {
+            const loader = document.getElementById('initial-loader');
+            if (loader) {
+              loader.remove();
+            }
+          }, 500);
+        }, 1000);
+      });
+      
+      // Fallback: remove loading screen after 5 seconds
+      setTimeout(function() {
+        document.body.classList.add('loaded');
+        setTimeout(function() {
+          const loader = document.getElementById('initial-loader');
+          if (loader) {
+            loader.remove();
+          }
+        }, 500);
+      }, 5000);
+    </script>
   </body>
 </html>

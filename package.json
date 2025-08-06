@@ -1,39 +1,86 @@
 {
-  "name": "quest-tasks-pucrs-tcc",
-  "version": "1.0.0",
-  "homepage": "https://quest-tasks-pucrs-tcc.vercel.app/",
-  "description": "Lista de Tarefas Gamificada - TCC PUCRS Pós-Graduação Full Stack",
+  "name": "quest-tasks",
+  "version": "2.0.0",
+  "description": "Quest Tasks - Transforme suas tarefas cotidianas em uma aventura épica! Sistema de gamificação completo com XP, níveis, conquistas e interface futurística.",
   "private": true,
+  "homepage": "./",
+  "author": {
+    "name": "Alison Schatz",
+    "email": "alison@example.com",
+    "url": "https://github.com/alisonschatz"
+  },
+  "keywords": [
+    "task-management",
+    "gamification",
+    "productivity",
+    "react",
+    "firebase",
+    "quest",
+    "achievements",
+    "xp-system"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alisonschatz/quest-tasks"
+  },
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.3.0",
-    "@testing-library/user-event": "^13.5.0",
-    "firebase": "^11.8.1",
-    "lucide-react": "^0.263.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "react-scripts": "^5.0.1",
+    "firebase": "^10.7.1",
+    "lucide-react": "^0.294.0",
+    "web-vitals": "^3.5.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
-    "gh-pages": "^5.0.0",
-    "postcss": "^8.5.4",
-    "tailwindcss": "^3.4.17"
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/jest": "^29.5.8",
+    "tailwindcss": "^3.3.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "eslint": "^8.54.0",
+    "eslint-config-react-app": "^7.0.1",
+    "prettier": "^3.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "build:analyze": "npm run build && npx serve -s build",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
+    "lint:check": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "clean": "rm -rf build node_modules package-lock.json && npm install",
+    "clean:cache": "rm -rf node_modules/.cache",
+    "prepare": "npm run format && npm run lint",
+    "deploy": "npm run build && firebase deploy",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "postbuild": "echo 'Build completed successfully! 🚀'"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+      "no-console": "off",
+      "react-hooks/exhaustive-deps": "warn",
+      "jsx-a11y/anchor-is-valid": "off"
+    }
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "printWidth": 100,
+    "bracketSpacing": true,
+    "arrowParens": "avoid"
   },
   "browserslist": {
     "production": [
@@ -47,15 +94,8 @@
       "last 1 safari version"
     ]
   },
-  "keywords": [
-    "react",
-    "gamification",
-    "todo",
-    "productivity",
-    "pucrs",
-    "tcc",
-    "full-stack"
-  ],
-  "author": "Alison Schatz <alisonschatz1@gmail.com>",
-  "license": "MIT"
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
 }

@@ -1,15 +1,100 @@
 {
   "short_name": "Quest Tasks",
-  "name": "Quest Tasks - Lista de Tarefas Gamificada",
+  "name": "Quest Tasks - Level Up Your Life",
+  "description": "Transforme suas tarefas cotidianas em uma aventura épica! Sistema de gamificação completo com XP, níveis, conquistas e interface futurística.",
   "icons": [
     {
       "src": "favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "icon-maskable-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#8B5CF6",
-  "background_color": "#1E1B4B"
+  "background_color": "#0F172A",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": ["productivity", "lifestyle", "games"],
+  "shortcuts": [
+    {
+      "name": "Nova Quest",
+      "short_name": "Nova Quest",
+      "description": "Criar uma nova tarefa rapidamente",
+      "url": "/?action=new-task",
+      "icons": [
+        {
+          "src": "icons/shortcut-new.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Conquistas",
+      "short_name": "Conquistas",
+      "description": "Ver suas conquistas",
+      "url": "/?action=achievements",
+      "icons": [
+        {
+          "src": "icons/shortcut-achievements.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Estatísticas",
+      "short_name": "Stats",
+      "description": "Ver suas estatísticas",
+      "url": "/?action=stats",
+      "icons": [
+        {
+          "src": "icons/shortcut-stats.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "dir": "ltr",
+  "iarc_rating_id": "",
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-1.png",
+      "type": "image/png",
+      "sizes": "1280x720",
+      "form_factor": "wide",
+      "label": "Quest Tasks Dashboard"
+    },
+    {
+      "src": "screenshots/mobile-1.png",
+      "type": "image/png",
+      "sizes": "390x844",
+      "form_factor": "narrow",
+      "label": "Quest Tasks Mobile"
+    }
+  ]
 }

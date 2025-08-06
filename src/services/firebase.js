@@ -5,12 +5,12 @@ import { getAuth } from 'firebase/auth';
 
 // Sua configuração Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDJ491DcbnLvcJYE55Q1BC5SUiLAt_DdYA",
-  authDomain: "quest-tasks-pucrs.firebaseapp.com",
-  projectId: "quest-tasks-pucrs",
-  storageBucket: "quest-tasks-pucrs.firebasestorage.app",
-  messagingSenderId: "930580049684",
-  appId: "1:930580049684:web:8c6d1ae61fca983ea7dc01"
+  apiKey: 'AIzaSyDJ491DcbnLvcJYE55Q1BC5SUiLAt_DdYA',
+  authDomain: 'quest-tasks-pucrs.firebaseapp.com',
+  projectId: 'quest-tasks-pucrs',
+  storageBucket: 'quest-tasks-pucrs.firebasestorage.app',
+  messagingSenderId: '930580049684',
+  appId: '1:930580049684:web:8c6d1ae61fca983ea7dc01',
 };
 
 // Inicializar Firebase
